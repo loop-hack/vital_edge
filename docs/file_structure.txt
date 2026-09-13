@@ -1,0 +1,30 @@
+VitalEdge Monorepo - File Structure & Use Cases
+
+
+ mobile-app/ (The Shipped Product)
+-----------------------------------
+This directory contains the Capacitor + React frontend, which is the actual application that users will install on their devices.
+* src/screens/: Holds the user interface, including the daily wellness Dashboard, Alerts history, and the Emergency SOS screen.
+* src/services/: The brain of the app.
+  - sensors/: collects raw data from the phone's accelerometer and optional BLE wearables.
+  - inference/: uses onnxRuntime.ts to run AI models entirely offline and relies on riskEngine.ts to fuse model outputs with environmental data for accurate alerts.
+  - storage/: manages the encrypted local database for rolling vitals history.
+  - alerts/: handles triggering local notifications and sending offline SMS SOS messages.
+* src/models/: This is where you will place the final, lightweight .onnx model files so they can be bundled directly into the mobile app.
+
+ ml-training/ (Your AI/ML Workspace)
+--------------------------------------
+This is an isolated, offline Python environment dedicated to model training; this code is NOT shipped inside the mobile app.
+* src/preprocessing/: Scripts like filters.py and windowing.py used to clean, resample, and format raw public dataset signals before feeding them to the AI.
+* src/models/: Contains your PyTorch neural network architectures, such as the anomaly_autoencoder.py for spotting abnormal heart rates and fall_cnn.py for detecting physical falls.
+* export_onnx.py: A crucial script that converts your heavy PyTorch models into optimized, quantized .onnx files that are small enough to run fast on a phone.
+
+ backend/ (Optional Cloud Sync)
+---------------------------------
+This holds the code for a lightweight FastAPI and MongoDB server.
+* app/routers/: Contains API endpoints (like sync.py) designed to securely receive data from the app.
+* Use Case: Because VitalEdge is a privacy-first edge AI tool, this backend is strictly opt-in. It is used *only* to power a public-health or caregiver dashboard using anonymized, aggregated summaries (like regional heat-stress trends), never raw personal vitals.
+
+ docs/ (Project Documentation)
+--------------------------------
+This folder is the single source of truth for the project's technical specifications. It houses your architecture diagrams, data flow charts, and the core "VitalEdge_Blueprint_260913_145443.pdf" document.
